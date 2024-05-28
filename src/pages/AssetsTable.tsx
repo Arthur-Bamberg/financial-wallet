@@ -1,24 +1,18 @@
 import { useEffect, useState } from 'react';
 import '../global.css';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { Wallet } from '@/interfaces/wallet.interface';
 import { Asset } from '@/types/asset.type';
 import { useNavigate } from 'react-router-dom';
 import { Order } from '@/types/order.type';
+import { MyTable } from '@/components/my/my-table';
+import { TableAsset } from '@/types/table-asset.type';
 
 export function AssetsTable() {
   const navigate = useNavigate();
   const [assets, setAssets] = useState<Asset[]>([]);
+  const [tableAssets, setTableAssets] = useState<TableAsset[]>([]);
   const [walletName, setWalletName] = useState<string>('');
   const [walletDescription, setWalletDescription] = useState<string>('');
   const [totalValueWallet, setTotalValueWallet] = useState<number>(0);
@@ -77,6 +71,7 @@ export function AssetsTable() {
       setWalletDescription(result.data.description);
 
       const newAssets: Asset[] = [];
+      const newTableAssets: TableAsset[] = [];
 
       let totalValueWallet = 0;
 
@@ -94,9 +89,10 @@ export function AssetsTable() {
         const percentageCeiling = walletAsset.price_ceiling
           ? (walletAsset.asset.price / walletAsset.price_ceiling) * 100
           : null;
+        const percentageWallet = (totalValue / totalValueWallet) * 100;
 
         newAssets.push({
-          id: walletAsset.id,
+          id: walletAsset.asset_id,
           name: walletAsset.asset.short_name,
           rank: walletAsset.rank,
           type: walletAsset.asset.type.name,
@@ -109,9 +105,28 @@ export function AssetsTable() {
           percentageWallet: (totalValue / totalValueWallet) * 100,
           totalValueWallet,
         });
+
+        newTableAssets.push({
+          id: walletAsset.asset_id,
+          name: walletAsset.asset.short_name,
+          rank: walletAsset.rank.toString(),
+          type: walletAsset.asset.type.name,
+          quantity: walletAsset.quantity.toString(),
+          price: `R$ ${walletAsset.asset.price.toFixed(2)}`,
+          priceCeiling: walletAsset.price_ceiling
+          ? 'R$ ' + walletAsset.price_ceiling.toFixed(2)
+          : ' - ',
+          percentageCeiling: percentageCeiling
+          ? `${percentageCeiling.toFixed(2)}%`
+          : ' - ',
+          bias: walletAsset.bias,
+          totalValue: `R$ ${totalValue.toFixed(2)}`,
+          percentageWallet: `${percentageWallet.toFixed(2)}%`,
+        });
       });
 
       setAssets(newAssets);
+      setTableAssets(newTableAssets);
     } catch (error) {
       navigate('/');
     }
@@ -136,47 +151,19 @@ export function AssetsTable() {
           Valor Total: R$ {totalValueWallet}
         </p>
       </div>
-      <Table>
-        <TableCaption>{walletDescription}</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[50px]">Rank</TableHead>
-            <TableHead className="w-[120px]">Nome</TableHead>
-            <TableHead className="w-[80px]">Tipo</TableHead>
-            <TableHead className="w-[100px]">Quantidade</TableHead>
-            <TableHead className="w-[80px]">Individual</TableHead>
-            <TableHead className="w-[80px]">Preço teto</TableHead>
-            <TableHead className="w-[50px]">% teto</TableHead>
-            <TableHead className="w-[80px]">Viés</TableHead>
-            <TableHead className="w-[80px]">Valor</TableHead>
-            <TableHead className="w-[90px]">Porcentagem</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {assets.map((asset) => (
-            <TableRow key={asset.id}>
-              <TableCell>{asset.rank}</TableCell>
-              <TableCell>{asset.name}</TableCell>
-              <TableCell>{asset.type}</TableCell>
-              <TableCell>{asset.quantity}</TableCell>
-              <TableCell>R$ {asset.price.toFixed(2)}</TableCell>
-              <TableCell>
-                {asset.priceCeiling
-                  ? 'R$ ' + asset.priceCeiling.toFixed(2)
-                  : ' - '}
-              </TableCell>
-              <TableCell>
-                {asset.percentageCeiling
-                  ? `${asset.percentageCeiling.toFixed(2)}%`
-                  : ' - '}
-              </TableCell>
-              <TableCell>{asset.bias}</TableCell>
-              <TableCell>R$ {asset.totalValue.toFixed(2)}</TableCell>
-              <TableCell>{asset.percentageWallet.toFixed(2)}%</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <MyTable columns={[
+        {name: 'ID', param: 'id', width: '300px'},
+        {name: 'Rank', param: 'rank', width: '50px'},
+        {name: 'Nome', param: 'name', width: '120px'},
+        {name: 'Tipo', param: 'type', width: '50px'},
+        {name: 'Quantidade', param: 'quantity', width: '50px'},
+        {name: 'Individual', param: 'price', width: '80px'},
+        {name: 'Preço teto', param: 'priceCeiling', width: '80px'},
+        {name: '% teto', param: 'percentageCeiling', width: '50px'},
+        {name: 'Viés', param: 'bias', width: '80px'},
+        {name: 'Valor', param: 'totalValue', width: '120px'},
+        {name: 'Porcentagem', param: 'percentageWallet', width: '90px'},
+      ]} description={walletDescription} data={tableAssets}/>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/shadcn-ui/input';
+import { Button } from '@/components/shadcn-ui/button';
 import '../global.css';
 import Cookies from 'js-cookie';
 import axios from 'axios';
