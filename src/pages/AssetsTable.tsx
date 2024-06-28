@@ -45,6 +45,7 @@ export function AssetsTable() {
       totalValue += totalPrice;
 
       orders.push({
+        id: asset.id,
         name: asset.name,
         type: asset.type,
         price: asset.price,
@@ -148,7 +149,7 @@ export function AssetsTable() {
 
   useEffect(() => {
     if (assets.length > 0) {
-      listOrders(200, 4, 'Comprar');
+      listOrders(200, 5, 'Comprar');
     }
   }, [assets]);
 
