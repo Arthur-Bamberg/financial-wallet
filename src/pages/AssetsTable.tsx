@@ -66,7 +66,7 @@ export function AssetsTable() {
 
 
       const result = await axios.get<Wallet>(
-        'http://localhost:3000/wallets/a387cdd5-8d0b-4d0c-8e20-da51bd5b56e0',
+        'http://localhost:3000/wallets/1',
         {
           headers: {
             'Content-Type': 'application/json',
