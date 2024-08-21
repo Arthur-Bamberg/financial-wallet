@@ -1,16 +1,15 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AssetsTable } from './pages/AssetsTable';
-import { Login } from './pages/Login';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Login } from "./screens/login";
 
-export const App = () => {
+function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-900 text-white flex justify-center items-center">
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/assets" element={<AssetsTable />} />
-        </Routes>
-      </div>
-    </Router>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        {/* <Route path="/wallet" element={<Wallet />} /> */}
+      </Routes>
+    </BrowserRouter>
   );
-};
+}
+
+export default App;
