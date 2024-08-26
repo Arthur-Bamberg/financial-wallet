@@ -5,12 +5,15 @@ import { useState } from "react";
 import Cookies from 'js-cookie';
 import axios, { AxiosError } from "axios";
 import { API_BASE_URL } from "../../common/envs";
+import { useNavigate } from "react-router-dom";
 
 export const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
@@ -24,6 +27,8 @@ export const Login = () => {
       Cookies.set('access_token', response.data.access_token);
 
       setLoading(false);
+
+      navigate("/wallet");
       
     } catch (err) {
       setLoading(false);
