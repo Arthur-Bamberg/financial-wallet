@@ -4,15 +4,15 @@ import Cookies from "js-cookie";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   CircularProgress,
-  Paper,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
+  TableContainer,
+  Paper,
 } from "@mui/material";
-import styles from "./styles.module.css";
+import styles from "./styles.module.css"; // Certifique-se de que este arquivo contém os estilos atualizados
 import axios from "axios";
 import { API_BASE_URL } from "../../common/envs";
 import { Asset } from "../../common/types";
@@ -25,16 +25,15 @@ export const Wallet = () => {
   const [totalValue, setTotalValue] = useState(0);
 
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const getWalletData = async (accessToken: string) => {
     try {
-      const { id } = useParams();
-
       const response = await axios.get<{
         name: string;
         description: string;
         wallets_assets: Asset[];
-      }>(`${API_BASE_URL}/wallets/1`, {
+      }>(`${API_BASE_URL}/wallets/${id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -72,13 +71,33 @@ export const Wallet = () => {
   }, [navigate]);
 
   return loading ? (
-    <CircularProgress />
+    <div className={styles.loadingContainer}>
+      <CircularProgress />
+    </div>
   ) : (
     <div className={styles.container}>
-      <h1>{name}</h1>
-      <h2>{description}</h2>
-      <TableContainer component={Paper}>
-        <Table>
+      <h1 className={styles.title}>{name}</h1>
+      <h2 className={styles.subtitle}>{description}</h2>
+      <TableContainer
+        component={Paper}
+        sx={{
+          backgroundColor: "#2c2c2c", // Cor de fundo escura para o container da tabela
+          borderRadius: "8px",
+        }}
+      >
+        <Table
+          sx={{
+            width: "100%",
+            "& td, & th": {
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "#ffffff",
+            },
+            "& th": {
+              backgroundColor: "#3d3d3d",
+              fontWeight: "bold",
+            },
+          }}
+        >
           <TableHead>
             <TableRow>
               <TableCell>Rank</TableCell>
@@ -94,8 +113,16 @@ export const Wallet = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {assets.map((asset) => (
-              <TableRow key={asset.asset_id}>
+            {assets.map((asset, index) => (
+              <TableRow
+                key={asset.asset_id}
+                sx={{
+                  backgroundColor: index % 2 === 0 ? "#2c2c2c" : "#242424",
+                  "&:hover": {
+                    backgroundColor: "#3a3a3a",
+                  },
+                }}
+              >
                 <TableCell>{asset.rank + "°"}</TableCell>
                 <TableCell>{asset.asset.short_name}</TableCell>
                 <TableCell>{asset.asset.type.name}</TableCell>
@@ -106,9 +133,10 @@ export const Wallet = () => {
                 </TableCell>
                 <TableCell>
                   {asset.price_ceiling
-                    ? ((asset.asset.price / asset.price_ceiling) * 100).toFixed(
-                        2
-                      ) + "%"
+                    ? (
+                        (asset.asset.price / asset.price_ceiling) *
+                        100
+                      ).toFixed(2) + "%"
                     : "-"}
                 </TableCell>
                 <TableCell>{asset.bias}</TableCell>
