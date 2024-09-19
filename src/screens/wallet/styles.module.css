@@ -10,7 +10,7 @@
   
   .title {
     color: #ffffff;
-    text-align: center;
+    width: 100%;
   }
   
   .subtitle {
@@ -26,3 +26,30 @@
     background-color: #1e1e1e;
   }
   
+  /* styles.module.css */
+
+.header {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+.editButton {
+  display: inline;
+}
+
+.textField {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 10px;
+}
+
+.totalValue {
+  color: #ffffff;
+  text-align: center;
+  margin: 20px 0;
+}
