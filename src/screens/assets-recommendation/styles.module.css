@@ -1,0 +1,20 @@
+.container {
+    margin-top: 50px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+.submit-button {
+    margin-top: 20px;
+}
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Centraliza o loader verticalmente */
+    background-color: #1e1e1e;
+  }

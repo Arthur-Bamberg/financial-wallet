@@ -2,7 +2,7 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { Alert, Button, CircularProgress, TextField } from "@mui/material";
 import styles from "./styles.module.css";
 import { useState } from "react";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import axios, { AxiosError } from "axios";
 import { API_BASE_URL } from "../../common/envs";
 import { useNavigate } from "react-router-dom";
@@ -24,12 +24,21 @@ export const Login = () => {
         password,
       });
 
-      Cookies.set('access_token', response.data.access_token);
+      const accessToken = response.data.access_token;
+
+      Cookies.set("access_token", accessToken);
+
+      const walletResponse = await axios.get(`${API_BASE_URL}/wallets`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      const wallets = walletResponse.data;
+
+      const walletId = wallets[0].id;
 
       setLoading(false);
 
-      navigate("/wallet");
-      
+      navigate(`/wallet/${walletId}`);
     } catch (err) {
       setLoading(false);
 

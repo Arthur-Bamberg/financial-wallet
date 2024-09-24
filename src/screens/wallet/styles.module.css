@@ -53,3 +53,12 @@
   text-align: center;
   margin: 20px 0;
 }
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+}
+
+.recommendButton {
+  background-color: #3d85c6; /* Cor do botão, pode ser personalizada */
+}

@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import styles from './styles.module.css'; // Certifique-se de que este arquivo contém os estilos atualizados
 import axios from 'axios';
 import { API_BASE_URL } from '../../common/envs';
@@ -71,7 +72,6 @@ export const Wallet = () => {
   };
 
   const handleConfirmEdit = async () => {
-    // Faz a chamada API para atualizar a carteira
     try {
       const accessToken = Cookies.get('access_token');
       if (!accessToken) {
@@ -92,20 +92,17 @@ export const Wallet = () => {
         }
       );
 
-      // Atualiza o estado com o novo nome e descrição
       setName(editedName);
       setDescription(editedDescription);
 
       setIsEditing(false);
     } catch (err) {
       console.error(err);
-      // Trate o erro (por exemplo, exiba uma mensagem de erro)
     }
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
-    // Descartar alterações
     setEditedName(name);
     setEditedDescription(description);
   };
@@ -174,16 +171,30 @@ export const Wallet = () => {
             <Typography variant="h4" className={styles.title}>
               {name}
             </Typography>
-            <IconButton
-              onClick={() => {
-                setEditedName(name);
-                setEditedDescription(description);
-                setIsEditing(true);
-              }}
-              className={styles.editButton}
-            >
-              <EditIcon style={{ color: '#ffffff' }} />
-            </IconButton>
+            <div className={styles.buttonGroup}>
+              <IconButton
+                onClick={() => {
+                  setEditedName(name);
+                  setEditedDescription(description);
+                  setIsEditing(true);
+                }}
+                className={styles.editButton}
+              >
+                <EditIcon style={{ color: '#ffffff' }} />
+              </IconButton>
+
+              {/* Novo botão para recomendações */}
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AssessmentIcon />}
+                onClick={() => navigate(`/assets-recommendation/${id}`)}
+                className={styles.recommendButton}
+                style={{ marginLeft: '10px' }}
+              >
+                Ver Recomendação de Ativos
+              </Button>
+            </div>
           </div>
           <Typography variant="h6" className={styles.subtitle}>
             {description}
@@ -196,7 +207,7 @@ export const Wallet = () => {
       <TableContainer
         component={Paper}
         sx={{
-          backgroundColor: '#2c2c2c', // Cor de fundo escura para o container da tabela
+          backgroundColor: '#2c2c2c',
           borderRadius: '8px',
           overflowX: 'auto',
         }}
