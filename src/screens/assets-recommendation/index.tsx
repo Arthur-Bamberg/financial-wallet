@@ -20,6 +20,8 @@ import "./styles.module.css";
 import Cookies from 'js-cookie';
 import { useNavigate, useParams } from "react-router-dom";
 import { API_BASE_URL } from "../../common/envs";
+import { Asset } from "../../common/types";
+import { formatCurrency } from "../../common/utils";
 
 const darkTheme = createTheme({
   palette: {
@@ -27,47 +29,17 @@ const darkTheme = createTheme({
   },
 });
 
-type Asset = {
-  id: number;
-  asset_id: number;
-  wallet_id: number;
-  price_ceiling: number;
-  rank: number;
-  bias: "Comprar" | "Vender" | "Manter";
-  quantity: number;
-  created_at: string;
-  updated_at: string;
-  asset: {
-    id: number;
-    short_name: string;
-    full_name: string;
-    price: number;
-    type_id: number;
-    created_at: string;
-    updated_at: string;
-    type: {
-      id: number;
-      name: string;
-      description: string;
-      created_at: string;
-      updated_at: string;
-    };
-  };
-};
-
 export const AssetsRecommendation = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalInvest, setTotalInvest] = useState<number>(0);
   const [numAssets, setNumAssets] = useState<number>(0);
   const [recommendations, setRecommendations] = useState<
-    {
-      id: number;
-      name: string;
+    (Asset & {
       unitsToBuy: number;
       remainingQuantity: number;
       totalValue: number;
-    }[]
+    })[]
   >([]);
   const { id } = useParams();
   const navigate = useNavigate();
@@ -105,23 +77,22 @@ export const AssetsRecommendation = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const filteredAssets = assets.filter((asset) => asset.bias === "Comprar");
-    const sortedAssets = filteredAssets.sort((a, b) => {
+    // Usar todos os ativos disponíveis
+    const sortedAssets = [...assets].sort((a, b) => {
       const aValue = a.asset.price * a.quantity;
       const bValue = b.asset.price * b.quantity;
       return aValue - bValue;
     });
 
     const selectedAssets = sortedAssets.slice(0, numAssets);
-    const amountPerAsset = totalInvest / numAssets;
+    const amountPerAsset = (totalInvest / numAssets) * 1.10; // Incluindo 10% de tolerância
 
     const recs = selectedAssets.map((asset) => {
       const unitsToBuy = Math.floor(amountPerAsset / asset.asset.price);
       const totalValue = unitsToBuy * asset.asset.price;
       const remainingQuantity = asset.quantity + unitsToBuy;
       return {
-        id: asset.asset.id,
-        name: asset.asset.short_name,
+        ...asset,
         unitsToBuy,
         remainingQuantity,
         totalValue,
@@ -131,14 +102,43 @@ export const AssetsRecommendation = () => {
     setRecommendations(recs);
   };
 
-  if (loading)  return 
-    <div className="loadingContainer">
-      <CircularProgress />
-    </div>
+  const handleExecuteRecommendations = async () => {
+    try {
+      const accessToken = Cookies.get('access_token');
+      if (!accessToken) {
+        navigate('/');
+        return;
+      }
+
+      for (const rec of recommendations) {
+        await axios.patch(
+          `${API_BASE_URL}/wallets/${id}/assets/${rec.asset.id}`,
+          { quantity: rec.remainingQuantity },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+      }
+
+      alert('Recomendações executadas com sucesso!');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao executar recomendações.');
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="loadingContainer">
+        <CircularProgress />
+      </div>
+    );
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <Container maxWidth="md" className="container">
+      <Container maxWidth="lg" className="container">
         <Typography variant="h4" gutterBottom>
           Recomendação de Ativos
         </Typography>
@@ -171,30 +171,44 @@ export const AssetsRecommendation = () => {
           </Button>
         </form>
         {recommendations.length > 0 && (
-          <TableContainer component={Paper} style={{ marginTop: "20px" }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID do Ativo</TableCell>
-                  <TableCell>Nome do Ativo</TableCell>
-                  <TableCell>Quantidade a Comprar</TableCell>
-                  <TableCell>Quantidade Restante</TableCell>
-                  <TableCell>Valor Total</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {recommendations.map((rec) => (
-                  <TableRow key={rec.id}>
-                    <TableCell>{rec.id}</TableCell>
-                    <TableCell>{rec.name}</TableCell>
-                    <TableCell>{rec.unitsToBuy}</TableCell>
-                    <TableCell>{rec.remainingQuantity}</TableCell>
-                    <TableCell>{rec.totalValue.toFixed(2)}</TableCell>
+          <>
+            <TableContainer component={Paper} style={{ marginTop: "20px" }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Nome</TableCell>
+                    <TableCell>Preço</TableCell>
+                    <TableCell>Preço Teto</TableCell>
+                    <TableCell>Quantidade Atual</TableCell>
+                    <TableCell>Quantidade a Comprar</TableCell>
+                    <TableCell>Nova Quantidade</TableCell>
+                    <TableCell>Valor Total</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {recommendations.map((rec) => (
+                    <TableRow key={rec.asset.id}>
+                      <TableCell>{rec.asset.short_name}</TableCell>
+                      <TableCell>{formatCurrency(rec.asset.price)}</TableCell>
+                      <TableCell>{formatCurrency(rec.price_ceiling)}</TableCell>
+                      <TableCell>{rec.quantity}</TableCell>
+                      <TableCell>{rec.unitsToBuy}</TableCell>
+                      <TableCell>{rec.remainingQuantity}</TableCell>
+                      <TableCell>{formatCurrency(rec.totalValue)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleExecuteRecommendations}
+              style={{ marginTop: "10px" }}
+            >
+              Executar Recomendações
+            </Button>
+          </>
         )}
       </Container>
     </ThemeProvider>

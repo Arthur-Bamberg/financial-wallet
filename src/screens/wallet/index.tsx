@@ -24,6 +24,7 @@ import styles from './styles.module.css'; // Certifique-se de que este arquivo c
 import axios from 'axios';
 import { API_BASE_URL } from '../../common/envs';
 import { Asset } from '../../common/types';
+import { formatCurrency, formatPercentage } from '../../common/utils';
 
 export const Wallet = () => {
   const [loading, setLoading] = useState(false);
@@ -119,14 +120,6 @@ export const Wallet = () => {
 
     getWalletData(access_token);
   }, [navigate]);
-
-  const formatCurrency = (value: number): string => {
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  };
-
-  const formatPercentage = (value: number): string => {
-    return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
-  };
 
   return loading ? (
     <div className={styles.loadingContainer}>
