@@ -15,12 +15,12 @@ import {
   IconButton,
   Button,
   TextField,
-  useMediaQuery
+  useMediaQuery,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
 import AssessmentIcon from '@mui/icons-material/Assessment';
-import styles from './styles.module.css'; // Certifique-se de que este arquivo contém os estilos atualizados
+import styles from './styles.module.css';
 import axios from 'axios';
 import { API_BASE_URL } from '../../common/envs';
 import { Asset } from '../../common/types';
@@ -35,6 +35,9 @@ export const Wallet = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [editedDescription, setEditedDescription] = useState('');
+
+  const [editingRow, setEditingRow] = useState<number>(0);
+  const [editedAsset, setEditedAsset] = useState<Asset | null>(null);
 
   const navigate = useNavigate();
   const { id } = useParams();
@@ -54,58 +57,14 @@ export const Wallet = () => {
         },
       });
 
-      let totalValue = 0;
-
-      for (const walletAsset of response.data.wallets_assets) {
-        const assetValue = walletAsset.asset.price * walletAsset.quantity;
-        totalValue += assetValue;
-      }
-
       setName(response.data.name);
       setDescription(response.data.description);
       setAssets(response.data.wallets_assets);
-      setTotalValue(totalValue);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleConfirmEdit = async () => {
-    try {
-      const accessToken = Cookies.get('access_token');
-      if (!accessToken) {
-        navigate('/');
-        return;
-      }
-
-      await axios.put(
-        `${API_BASE_URL}/wallets/${id}`,
-        {
-          name: editedName,
-          description: editedDescription,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      setName(editedName);
-      setDescription(editedDescription);
-
-      setIsEditing(false);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditedName(name);
-    setEditedDescription(description);
   };
 
   useEffect(() => {
@@ -120,6 +79,62 @@ export const Wallet = () => {
 
     getWalletData(access_token);
   }, [navigate]);
+
+  useEffect(() => {
+    let totalValue = 0;
+
+    for (const walletAsset of assets) {
+      const assetValue = walletAsset.asset.price * walletAsset.quantity;
+      totalValue += assetValue;
+    }
+
+    setTotalValue(totalValue);
+  }, [assets]);
+
+  const handleEditClick = (asset: Asset) => {
+    setEditingRow(asset.id);
+    setEditedAsset({ ...asset });
+  };
+
+  const handleConfirmEdit = async () => {
+    try {
+      const accessToken = Cookies.get('access_token');
+      if (!accessToken) {
+        navigate('/');
+        return;
+      }
+
+      await axios.patch(
+        `${API_BASE_URL}/wallets/${editedAsset?.wallet_id}/assets/${editedAsset?.asset_id}`,
+        {
+          quantity: editedAsset?.quantity,
+          price_ceiling: editedAsset?.price_ceiling,
+          bias: editedAsset?.bias,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      setAssets((prevAssets) =>
+        prevAssets.map((asset) =>
+          asset.id === editedAsset?.id ? (editedAsset as Asset) : asset
+        )
+      );
+
+      setEditingRow(0);
+      setEditedAsset(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRow(0);
+    setEditedAsset(null);
+  };
 
   return loading ? (
     <div className={styles.loadingContainer}>
@@ -175,18 +190,6 @@ export const Wallet = () => {
               >
                 <EditIcon style={{ color: '#ffffff' }} />
               </IconButton>
-
-              {/* Novo botão para recomendações */}
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AssessmentIcon />}
-                onClick={() => navigate(`/assets-recommendation/${id}`)}
-                className={styles.recommendButton}
-                style={{ marginLeft: '10px' }}
-              >
-                Ver Recomendação de Ativos
-              </Button>
             </div>
           </div>
           <Typography variant="h6" className={styles.subtitle}>
@@ -197,6 +200,16 @@ export const Wallet = () => {
       <Typography variant="h5" className={styles.totalValue}>
         Total em Ativos: {formatCurrency(totalValue)}
       </Typography>
+      <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AssessmentIcon />}
+                onClick={() => navigate(`/assets-recommendation/${id}`)}
+                className={styles.recommendButton}
+                style={{ marginLeft: '10px' }}
+              >
+                Ver Recomendação de Ativos
+              </Button>
       <TableContainer
         component={Paper}
         sx={{
@@ -235,12 +248,13 @@ export const Wallet = () => {
               )}
               <TableCell>Valor Total</TableCell>
               {!isMobile && <TableCell>% Carteira</TableCell>}
+              <TableCell>Ações</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {assets.map((asset, index) => (
               <TableRow
-                key={asset.asset_id}
+                key={asset.id}
                 sx={{
                   backgroundColor: index % 2 === 0 ? '#2c2c2c' : '#242424',
                   '&:hover': {
@@ -253,25 +267,108 @@ export const Wallet = () => {
                 <TableCell>{asset.asset.type.name}</TableCell>
                 {!isMobile && (
                   <>
-                    <TableCell>{asset.quantity}</TableCell>
+                    <TableCell>
+                      {editingRow === asset.id ? (
+                        <TextField
+                          value={editedAsset?.quantity}
+                          onChange={(e) =>
+                            setEditedAsset({
+                              ...(editedAsset as Asset),
+                              quantity: parseFloat(e.target.value),
+                            })
+                          }
+                          type="number"
+                          InputProps={{ inputProps: { min: 0 } }}
+                        />
+                      ) : (
+                        asset.quantity
+                      )}
+                    </TableCell>
                     <TableCell>{formatCurrency(asset.asset.price)}</TableCell>
                     <TableCell>
-                      {asset.price_ceiling ? formatCurrency(asset.price_ceiling) : '-'}
+                      {editingRow === asset.id ? (
+                        <TextField
+                          value={editedAsset?.price_ceiling || ''}
+                          onChange={(e) =>
+                            setEditedAsset({
+                              ...(editedAsset as Asset),
+                              price_ceiling: parseFloat(e.target.value) || 0,
+                            })
+                          }
+                          type="number"
+                          InputProps={{ inputProps: { min: 0 } }}
+                        />
+                      ) : asset.price_ceiling ? (
+                        formatCurrency(asset.price_ceiling)
+                      ) : (
+                        '-'
+                      )}
                     </TableCell>
                     <TableCell>
                       {asset.price_ceiling
                         ? formatPercentage((asset.asset.price / asset.price_ceiling) * 100)
                         : '-'}
                     </TableCell>
-                    <TableCell>{asset.bias}</TableCell>
+                    <TableCell>
+                      {editingRow === asset.id ? (
+                        <TextField
+                          value={editedAsset?.bias}
+                          onChange={(e) =>
+                            setEditedAsset({
+                              ...(editedAsset as Asset),
+                              bias: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        asset.bias
+                      )}
+                    </TableCell>
                   </>
                 )}
-                <TableCell>{formatCurrency(asset.asset.price * asset.quantity)}</TableCell>
+                <TableCell>
+                  {formatCurrency(
+                    (editingRow === asset.id ? editedAsset?.quantity : asset.quantity)! *
+                      asset.asset.price
+                  )}
+                </TableCell>
                 {!isMobile && (
                   <TableCell>
-                    {formatPercentage((asset.asset.price * asset.quantity * 100) / totalValue)}
+                    {formatPercentage(
+                      (((editingRow === asset.id ? editedAsset?.quantity : asset.quantity)! *
+                        asset.asset.price *
+                        100) /
+                        totalValue) || 0
+                    )}
                   </TableCell>
                 )}
+                <TableCell>
+                  {editingRow === asset.id ? (
+                    <>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleConfirmEdit}
+                        size="small"
+                      >
+                        Confirmar
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        onClick={handleCancelEdit}
+                        size="small"
+                        style={{ marginLeft: '8px' }}
+                      >
+                        Cancelar
+                      </Button>
+                    </>
+                  ) : (
+                    <IconButton onClick={() => handleEditClick(asset)}>
+                      <EditIcon style={{ color: '#ffffff' }} />
+                    </IconButton>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

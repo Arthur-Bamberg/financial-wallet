@@ -4,7 +4,7 @@ export type Asset = {
     wallet_id: number;
     price_ceiling: number;
     rank: number;
-    bias: "Comprar" | "Vender" | "Manter";
+    bias: "Comprar" | "Vender" | "Manter" | string;
     quantity: number;
     created_at: string;
     updated_at: string;
