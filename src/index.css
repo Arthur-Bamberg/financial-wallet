@@ -1,10 +1,18 @@
+:root {
+    --white: #fff;
+    --whiteGreen: #F0FFF0;
+    --darkGreen: #2E8B57;
+    --green: #3CB371;
+    --lightGreen: #8FBC8F;
+}
+
 body {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
-    color: white;
-    background-color: #28313E;
+    color: black;
+    background-color: var(--lightGreen);
     font-family: Roboto, Arial, sans-serif;
 }

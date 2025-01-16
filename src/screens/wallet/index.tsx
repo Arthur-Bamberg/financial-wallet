@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   CircularProgress,
   Table,
@@ -16,25 +16,25 @@ import {
   Button,
   TextField,
   useMediaQuery,
-} from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import EditIcon from '@mui/icons-material/Edit';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import styles from './styles.module.css';
-import axios from 'axios';
-import { API_BASE_URL } from '../../common/envs';
-import { Asset } from '../../common/types';
-import { formatCurrency, formatPercentage } from '../../common/utils';
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import EditIcon from "@mui/icons-material/Edit";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import styles from "./styles.module.css";
+import axios from "axios";
+import { API_BASE_URL } from "../../common/envs";
+import { Asset } from "../../common/types";
+import { formatCurrency, formatPercentage } from "../../common/utils";
 
 export const Wallet = () => {
   const [loading, setLoading] = useState(false);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [assets, setAssets] = useState<Asset[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState('');
-  const [editedDescription, setEditedDescription] = useState('');
+  const [editedName, setEditedName] = useState("");
+  const [editedDescription, setEditedDescription] = useState("");
 
   const [editingRow, setEditingRow] = useState<number>(0);
   const [editedAsset, setEditedAsset] = useState<Asset | null>(null);
@@ -43,7 +43,7 @@ export const Wallet = () => {
   const { id } = useParams();
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const getWalletData = async (accessToken: string) => {
     try {
@@ -70,10 +70,10 @@ export const Wallet = () => {
   useEffect(() => {
     setLoading(true);
 
-    const access_token = Cookies.get('access_token');
+    const access_token = Cookies.get("access_token");
 
     if (!access_token) {
-      navigate('/');
+      navigate("/");
       return;
     }
 
@@ -98,9 +98,9 @@ export const Wallet = () => {
 
   const handleConfirmEdit = async () => {
     try {
-      const accessToken = Cookies.get('access_token');
+      const accessToken = Cookies.get("access_token");
       if (!accessToken) {
-        navigate('/');
+        navigate("/");
         return;
       }
 
@@ -150,8 +150,8 @@ export const Wallet = () => {
             label="Nome"
             variant="outlined"
             className={styles.textField}
-            InputProps={{ style: { color: '#ffffff' } }}
-            InputLabelProps={{ style: { color: '#ffffff' } }}
+            InputProps={{ style: { color: "#ffffff" } }}
+            InputLabelProps={{ style: { color: "#ffffff" } }}
           />
           <TextField
             value={editedDescription}
@@ -159,16 +159,24 @@ export const Wallet = () => {
             label="Descrição"
             variant="outlined"
             className={styles.textField}
-            InputProps={{ style: { color: '#ffffff' } }}
-            InputLabelProps={{ style: { color: '#ffffff' } }}
+            InputProps={{ style: { color: "#ffffff" } }}
+            InputLabelProps={{ style: { color: "#ffffff" } }}
             multiline
             rows={2}
           />
           <div className={styles.buttonContainer}>
-            <Button variant="contained" color="primary" onClick={handleConfirmEdit}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleConfirmEdit}
+            >
               Confirmar
             </Button>
-            <Button variant="outlined" color="secondary" onClick={handleCancelEdit}>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={handleCancelEdit}
+            >
               Cancelar
             </Button>
           </div>
@@ -188,7 +196,7 @@ export const Wallet = () => {
                 }}
                 className={styles.editButton}
               >
-                <EditIcon style={{ color: '#ffffff' }} />
+                <EditIcon style={{ color: "#ffffff" }} />
               </IconButton>
             </div>
           </div>
@@ -201,36 +209,46 @@ export const Wallet = () => {
         Total em Ativos: {formatCurrency(totalValue)}
       </Typography>
       <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AssessmentIcon />}
-                onClick={() => navigate(`/assets-recommendation/${id}`)}
-                className={styles.recommendButton}
-                style={{ marginLeft: '10px' }}
-              >
-                Ver Recomendação de Ativos
-              </Button>
+        variant="contained"
+        color="primary"
+        startIcon={<AssessmentIcon />}
+        onClick={() => navigate(`/add-asset`)}
+        className={styles.recommendButton}
+        style={{ marginLeft: "10px" }}
+      >
+        Adicionar Ativos à Carteira
+      </Button>
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<AssessmentIcon />}
+        onClick={() => navigate(`/assets-recommendation/${id}`)}
+        className={styles.recommendButton}
+        style={{ marginLeft: "10px" }}
+      >
+        Ver Recomendação de Ativos
+      </Button>
       <TableContainer
         component={Paper}
         sx={{
-          backgroundColor: '#2c2c2c',
-          borderRadius: '8px',
-          overflowX: 'auto',
+          backgroundColor: "#2c2c2c",
+          borderRadius: "8px",
+          overflowX: "auto",
         }}
       >
         <Table
           sx={{
             minWidth: 650,
-            '& td, & th': {
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              color: '#ffffff',
+            "& td, & th": {
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "#ffffff",
             },
-            '& th': {
-              backgroundColor: '#3d3d3d',
-              fontWeight: 'bold',
+            "& th": {
+              backgroundColor: "#3d3d3d",
+              fontWeight: "bold",
             },
           }}
-          size={isMobile ? 'small' : 'medium'}
+          size={isMobile ? "small" : "medium"}
         >
           <TableHead>
             <TableRow>
@@ -256,13 +274,13 @@ export const Wallet = () => {
               <TableRow
                 key={asset.id}
                 sx={{
-                  backgroundColor: index % 2 === 0 ? '#2c2c2c' : '#242424',
-                  '&:hover': {
-                    backgroundColor: '#3a3a3a',
+                  backgroundColor: index % 2 === 0 ? "#2c2c2c" : "#242424",
+                  "&:hover": {
+                    backgroundColor: "#3a3a3a",
                   },
                 }}
               >
-                <TableCell>{asset.rank + '°'}</TableCell>
+                <TableCell>{asset.rank + "°"}</TableCell>
                 <TableCell>{asset.asset.short_name}</TableCell>
                 <TableCell>{asset.asset.type.name}</TableCell>
                 {!isMobile && (
@@ -288,7 +306,7 @@ export const Wallet = () => {
                     <TableCell>
                       {editingRow === asset.id ? (
                         <TextField
-                          value={editedAsset?.price_ceiling || ''}
+                          value={editedAsset?.price_ceiling || ""}
                           onChange={(e) =>
                             setEditedAsset({
                               ...(editedAsset as Asset),
@@ -301,13 +319,15 @@ export const Wallet = () => {
                       ) : asset.price_ceiling ? (
                         formatCurrency(asset.price_ceiling)
                       ) : (
-                        '-'
+                        "-"
                       )}
                     </TableCell>
                     <TableCell>
                       {asset.price_ceiling
-                        ? formatPercentage((asset.asset.price / asset.price_ceiling) * 100)
-                        : '-'}
+                        ? formatPercentage(
+                            (asset.asset.price / asset.price_ceiling) * 100
+                          )
+                        : "-"}
                     </TableCell>
                     <TableCell>
                       {editingRow === asset.id ? (
@@ -328,17 +348,20 @@ export const Wallet = () => {
                 )}
                 <TableCell>
                   {formatCurrency(
-                    (editingRow === asset.id ? editedAsset?.quantity : asset.quantity)! *
-                      asset.asset.price
+                    (editingRow === asset.id
+                      ? editedAsset?.quantity
+                      : asset.quantity)! * asset.asset.price
                   )}
                 </TableCell>
                 {!isMobile && (
                   <TableCell>
                     {formatPercentage(
-                      (((editingRow === asset.id ? editedAsset?.quantity : asset.quantity)! *
+                      ((editingRow === asset.id
+                        ? editedAsset?.quantity
+                        : asset.quantity)! *
                         asset.asset.price *
                         100) /
-                        totalValue) || 0
+                        totalValue || 0
                     )}
                   </TableCell>
                 )}
@@ -358,14 +381,14 @@ export const Wallet = () => {
                         color="secondary"
                         onClick={handleCancelEdit}
                         size="small"
-                        style={{ marginLeft: '8px' }}
+                        style={{ marginLeft: "8px" }}
                       >
                         Cancelar
                       </Button>
                     </>
                   ) : (
                     <IconButton onClick={() => handleEditClick(asset)}>
-                      <EditIcon style={{ color: '#ffffff' }} />
+                      <EditIcon style={{ color: "#ffffff" }} />
                     </IconButton>
                   )}
                 </TableCell>

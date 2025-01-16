@@ -1,17 +1,18 @@
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { Alert, Button, CircularProgress, TextField } from "@mui/material";
 import styles from "./styles.module.css";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Cookies from "js-cookie";
 import axios, { AxiosError } from "axios";
 import { API_BASE_URL } from "../../common/envs";
 import { useNavigate } from "react-router-dom";
+import { WalletContext } from "../../context/WalletContext";
 
 export const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { setWallet } = useContext(WalletContext);
 
   const navigate = useNavigate();
 
@@ -36,6 +37,8 @@ export const Login = () => {
 
       const walletId = wallets[0].id;
 
+      setWallet(walletId);
+
       setLoading(false);
 
       navigate(`/wallet/${walletId}`);
@@ -58,23 +61,24 @@ export const Login = () => {
     <CircularProgress />
   ) : (
     <div className={styles.container}>
-      <AccountBalanceWalletIcon
-        style={{ fontSize: 150, color: "#6B2504", margin: "0 auto" }}
-      />
+      <img src="../../../assets/wallet.png" />
+      <h1>Entrar</h1>
       <TextField
         label="E-mail"
         type="email"
         autoComplete="email"
+        color="success"
         onChange={(e) => setEmail(e.target.value)}
       />
       <TextField
         label="Senha"
         type="password"
         autoComplete="current-password"
+        color="success"
         onChange={(e) => setPassword(e.target.value)}
       />
       {error && <Alert severity="error">{error}</Alert>}
-      <Button variant="contained" color="primary" onClick={handleLogin}>
+      <Button variant="contained" color="success" onClick={handleLogin}>
         Entrar
       </Button>
     </div>
