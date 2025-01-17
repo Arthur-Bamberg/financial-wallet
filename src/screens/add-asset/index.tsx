@@ -54,7 +54,7 @@ export const AddAsset = () => {
     fetchAssets();
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const accessToken = Cookies.get("access_token");

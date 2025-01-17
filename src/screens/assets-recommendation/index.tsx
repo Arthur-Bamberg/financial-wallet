@@ -77,8 +77,10 @@ export const AssetsRecommendation = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Usar todos os ativos disponíveis
-    const sortedAssets = [...assets].sort((a, b) => {
+
+    const filteredAssets = assets.filter((asset) => asset.bias === 'Comprar');
+
+    const sortedAssets = filteredAssets.sort((a, b) => {
       const aValue = a.asset.price * a.quantity;
       const bValue = b.asset.price * b.quantity;
       return aValue - bValue;

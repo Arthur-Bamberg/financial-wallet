@@ -1,8 +1,9 @@
-import { createContext, useState } from 'react';
+import { createContext, useState, ReactNode } from 'react';
 
-export const WalletContext = createContext({ wallet: 0, setWallet: (value) => {} });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const WalletContext = createContext({ wallet: 0, setWallet: (_value: number) => {} });
 
-export const WalletProvider = ({ children }) => {
+export const WalletProvider = ({ children }: {children: ReactNode}) => {
     const [wallet, setWallet] = useState(0);
 
     return (
