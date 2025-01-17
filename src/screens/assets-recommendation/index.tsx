@@ -124,7 +124,7 @@ export const AssetsRecommendation = () => {
         );
       }
 
-      alert('Recomendações executadas com sucesso!');
+      navigate(`/wallet/${id}`);
     } catch (err) {
       console.error(err);
       alert('Erro ao executar recomendações.');
